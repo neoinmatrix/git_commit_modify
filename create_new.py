@@ -1,5 +1,6 @@
 import os
 import shutil
+import sys
 
 def create( user):
     raw_path, new_path = user["raw_path"], user["new_path"]
@@ -15,9 +16,7 @@ def create( user):
     
     if user["localtime_modify"]:
         cmd+=f"sudo timedatectl set-ntp false  # 关闭自动更新时间 \n"
-    
-    cmd_tmp=f"cd {raw_path} && git log --pretty='format:%H %cI %s' > {user['tmp_path']} "
-    os.system(cmd_tmp)    
+
     dirs=[f for f in os.listdir(raw_path) if ".git" not in f]
     dateinfo=open(user['tmp_path'],"r").readlines()
     for line in dateinfo[::-1]:
@@ -43,20 +42,30 @@ def create( user):
     
 def main():
     root="./"
+    root=os.path.abspath(root)
     user={
-        "raw_path":root+"raw",                      # 原始的项目的git
-        "new_path":root+"new",                      # 全新的项目的git
-        "tmp_path":root+"git.log",                  # 需要修改的commit time & message
-        "cmd_path":root+"cmd.sh",                   # False 不设置 本地时间
+        "raw_path":os.path.join(root,"raw"),        # 原始的项目的git
+        "new_path":os.path.join(root,"new"),        # 全新的项目的git
+        "tmp_path":os.path.join(root,"git.log"),    # 需要修改的commit time & message
+        "cmd_path":os.path.join(root,"cmd.sh"),     # False 不设置 本地时间
         "name": "demo",                             # 新项目的用户名
         "email":"demo@demo.com",                    # 新项目的邮箱
         "gitremote":"git@demo.com:demo/demoproj.git",  #为空是不提交
         "gitpush": False,                           # False 不push
         "localtime_modify": False,                  # False 不设置 本地时间
     }
-    cmd=create(user)
-    open(user["cmd_path"],"w").write(cmd)
-    print("ok")
+    if len(sys.argv)==1:
+        cmd=create(user)
+        open(user["cmd_path"],"w").write(cmd)
+        print("create cmd.sh is ok")
+    else:
+        raw_path,tmp_path=user["raw_path"],user["tmp_path"]
+        if os.path.exists(raw_path)==False:
+            print("not existed of raw proj")
+        cmd_tmp=f"cd {raw_path} && git log --pretty='format:%H %cI %s' > {tmp_path} "
+        os.system(cmd_tmp) 
+        print("create git.log is ok")
+   
 
 if __name__ == '__main__':
     main()

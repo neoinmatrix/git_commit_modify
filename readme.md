@@ -26,9 +26,11 @@ raw_path 为原始需要修改的git库，new_path为新库
 ```
 
 # 使用指南 demo 
+- 要求 linux , python > 3.6 
 - tar -zxvf raw.tgz    # 解压例子git目录
 - vi create_new.py     # 配置 main函数中 user 的信息
-- python create_new.py # 生成 git.log 和 cmd.sh
+- python create_new.py git.log # 生成 git.log
+- python create_new.py # 生成  cmd.sh
 - vi git.log           # 修改 time和message
 - bash cmd.sh          # 执行 创建new 新项目
 
