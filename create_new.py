@@ -17,7 +17,6 @@ def create( user):
     if user["localtime_modify"]:
         cmd+=f"sudo timedatectl set-ntp false  # 关闭自动更新时间 \n"
 
-    dirs=[f for f in os.listdir(raw_path) if ".git" not in f]
     dateinfo=open(user['tmp_path'],"r").readlines()
     for line in dateinfo[::-1]:
         cols=line.split(" ")
@@ -28,13 +27,20 @@ def create( user):
             cmd+=f"sudo date --set=\"{ctime}\" \n"
         cmd+=f"cd {raw_path} \n"
         cmd+=f"git checkout {hcode} \n"
+        cmd_now=f"git checkout {hcode}"
+        os.chdir(raw_path)
+        os.system(cmd_now)
+        # checkout 到点之后 处理文件
+        dirs=[f for f in os.listdir(raw_path) if ".git" not in f]
         for d in dirs:
             cmd+=f"cp -r {raw_path}/{d} {new_path} \n"
+            
         cmd+=f"cd {new_path} \n"
         cmd+="git add . \n"
         cmd+=f"git commit -m \"{cminfo}\" --date=\"{ctime}\" \n"
         if user["gitpush"]:
             cmd+=f"git push origin master \n"
+            
     if user["localtime_modify"]:
         cmd+=f"sudo timedatectl set-ntp true  # 关闭自动更新时间 \n"
     return cmd
